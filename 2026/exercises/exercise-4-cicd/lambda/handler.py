@@ -1,4 +1,7 @@
 import json
+import os
+
+import boto3
 
 
 def handler(event, context):
@@ -8,9 +11,14 @@ def handler(event, context):
     # environment variable, and put the count in the response as
     # "file_count". Hint: boto3.client("s3").list_objects_v2(Bucket=...) —
     # an empty bucket's response has no "Contents" key at all.
-    file_count = None
-
+    bucket_name = os.environ.get("BUCKET_NAME")
+    response = boto3.client("s3").list_objects_v2(Bucket=bucket_name)
+    if "Contents" in response:
+        file_count = len(response["Contents"])
+    else:
+        file_count = 0
     return {
         "statusCode": 200,
-        "body": json.dumps({"message": f"hello, {name}", "file_count": file_count}),
+        "body": json.dumps({"message": f"hello, {name}",
+        "file_count": file_count}),
     }

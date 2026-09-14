@@ -1,14 +1,29 @@
 import json
+import os
+
+import boto3
 
 
 def handler(event, context):
     name = event.get("queryStringParameters", {}).get("name", "world") if event.get("queryStringParameters") else "world"
 
-    # TODO: count the objects in the S3 bucket named by the BUCKET_NAME
-    # environment variable, and put the count in the response as
-    # "file_count". Hint: boto3.client("s3").list_objects_v2(Bucket=...) —
-    # an empty bucket's response has no "Contents" key at all.
-    file_count = None
+    bucket_name = os.environ["BUCKET_NAME"]
+    s3 = boto3.client("s3")
+
+    file_count = 0
+    continuation_token = None
+    while True:
+        kwargs = {"Bucket": bucket_name}
+        if continuation_token:
+            kwargs["ContinuationToken"] = continuation_token
+
+        response = s3.list_objects_v2(**kwargs)
+        file_count += len(response.get("Contents", []))
+
+        if response.get("IsTruncated"):
+            continuation_token = response["NextContinuationToken"]
+        else:
+            break
 
     return {
         "statusCode": 200,

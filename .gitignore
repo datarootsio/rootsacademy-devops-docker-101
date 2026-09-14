@@ -6,3 +6,4 @@ __pycache__/
 *.pyc
 .DS_Store
 .claude/
+2026/exercises/exercise-4-cicd/.python-version
